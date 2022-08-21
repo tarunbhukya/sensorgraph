@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <style>
+      body { margin: 0; padding-bottom: 3rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+
+      #form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); }
+      #input { border: none; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem; }
+      #input:focus { outline: none; }
+      #form > button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; }
+
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages > li { padding: 0.5rem 1rem; }
+      #messages > li:nth-child(odd) { background: #efefef; }
+    </style>
+  </head>
+  <body>
+    <div id="chartContainer" style="height: 300px; width: 100%;"></div>
+  </body>
+  <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+    <script>
+    window.onload = function () {
+
+        var dps = []; // dataPoints
+        var chart = new CanvasJS.Chart("chartContainer", {
+            zoomEnabled: true,
+	        animationEnabled: true,
+            title :{
+                text: "Dynamic Data"
+            },
+            axisY: {
+                lineThickness: 1
+            },
+            data: [{
+                type: "line",
+                dataPoints: dps
+            }]
+        });
+
+        var xVal = 0;
+        var yVal = 100; 
+        var updateInterval = 1000;
+        var dataLength = 1000; // number of dataPoints visible at any point
+
+        var updateChart = function (x,y) {
+            console.log(x)
+           
+                dps.push({
+                    x: x,
+                    y: y
+                });
+            // if (dps.length > dataLength) {
+            //     dps.shift();
+            // }
+
+            chart.render();
+        };
+
+        const socket = io();
+        socket.on("sensor", (data) => {
+            let a = data.split(",")
+            updateChart(parseFloat(a[1]), parseFloat(a[2]))
+        })
+
+        // updateChart(dataLength);
+        // setInterval(function(){updateChart()}, updateInterval);
+    }
+    </script>
+</html>
